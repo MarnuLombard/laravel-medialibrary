@@ -4,7 +4,6 @@ namespace Spatie\MediaLibrary\UrlGenerator;
 
 use Spatie\MediaLibrary\Exceptions\UrlCannotBeDetermined;
 use Spatie\String\Str;
-
 class LocalUrlGenerator extends BaseUrlGenerator
 {
     /**
@@ -14,60 +13,48 @@ class LocalUrlGenerator extends BaseUrlGenerator
      *
      * @throws \Spatie\MediaLibrary\Exceptions\UrlCannotBeDetermined
      */
-    public function getUrl() : string
+    public function getUrl()
     {
-        if (! string($this->getStoragePath())->startsWith(public_path())) {
+        if (!string($this->getStoragePath())->startsWith(public_path())) {
             throw UrlCannotBeDetermined::mediaNotPubliclyAvailable($this->getStoragePath(), public_path());
         }
-
-        $url = $this->getBaseMediaDirectory().'/'.$this->getPathRelativeToRoot();
-
+        $url = $this->getBaseMediaDirectory() . '/' . $this->getPathRelativeToRoot();
         $url = $this->makeCompatibleForNonUnixHosts($url);
-
         $url = $this->rawUrlEncodeFilename($url);
-
         return $url;
     }
-
     /*
      * Get the path for the profile of a media item.
      */
-    public function getPath() : string
+    public function getPath()
     {
-        return $this->getStoragePath().'/'.$this->getPathRelativeToRoot();
+        return $this->getStoragePath() . '/' . $this->getPathRelativeToRoot();
     }
-
     /*
      * Get the directory where all files of the media item are stored.
      */
-    protected function getBaseMediaDirectory() : Str
+    protected function getBaseMediaDirectory()
     {
         $baseDirectory = string($this->getStoragePath())->replace(public_path(), '');
-
         return $baseDirectory;
     }
-
     /*
      * Get the path where the whole medialibrary is stored.
      */
-    protected function getStoragePath() : string
+    protected function getStoragePath()
     {
-        $diskRootPath = $this->config->get('filesystems.disks.'.$this->media->disk.'.root');
-
+        $diskRootPath = $this->config->get('filesystems.disks.' . $this->media->disk . '.root');
         return realpath($diskRootPath);
     }
-
-    protected function makeCompatibleForNonUnixHosts(string $url) : string
+    protected function makeCompatibleForNonUnixHosts($url)
     {
         if (DIRECTORY_SEPARATOR != '/') {
             $url = str_replace(DIRECTORY_SEPARATOR, '/', $url);
         }
-
         return $url;
     }
-
-    public function rawUrlEncodeFilename(string $path = ''): string
+    public function rawUrlEncodeFilename($path = '')
     {
-        return pathinfo($path, PATHINFO_DIRNAME).'/'.rawurlencode(pathinfo($path, PATHINFO_BASENAME));
+        return pathinfo($path, PATHINFO_DIRNAME) . '/' . rawurlencode(pathinfo($path, PATHINFO_BASENAME));
     }
 }

@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Spatie\MediaLibrary\Exceptions\InvalidConversion;
 use Spatie\MediaLibrary\HasMedia\Interfaces\HasMediaConversions;
 use Spatie\MediaLibrary\Media;
-
 class ConversionCollection extends Collection
 {
     /**
@@ -20,7 +19,6 @@ class ConversionCollection extends Collection
     {
         return (new static())->setMedia($media);
     }
-
     /**
      * @param \Spatie\MediaLibrary\Media $media
      *
@@ -29,14 +27,10 @@ class ConversionCollection extends Collection
     public function setMedia(Media $media)
     {
         $this->items = [];
-
         $this->addConversionsFromRelatedModel($media);
-
         $this->addManipulationsFromDb($media);
-
         return $this;
     }
-
     /**
      *  Get a conversion by it's name.
      *
@@ -46,17 +40,15 @@ class ConversionCollection extends Collection
      *
      * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversion
      */
-    public function getByName(string $name)
+    public function getByName($name)
     {
         foreach ($this->items as $conversion) {
             if ($conversion->getName() === $name) {
                 return $conversion;
             }
         }
-
         throw InvalidConversion::unknownName($name);
     }
-
     /**
      * Add the conversion that are defined on the related model of
      * the given media.
@@ -66,20 +58,16 @@ class ConversionCollection extends Collection
     protected function addConversionsFromRelatedModel(Media $media)
     {
         $modelName = Arr::get(Relation::morphMap(), $media->model_type, $media->model_type);
-
         /*
          * To prevent an sql query create a new model instead
          * of the using the associated one
          */
         $model = new $modelName();
-
         if ($model instanceof HasMediaConversions) {
             $model->registerMediaConversions();
         }
-
         $this->items = $model->mediaConversions;
     }
-
     /**
      * Add the extra manipulations that are defined on the given media.
      *
@@ -91,7 +79,6 @@ class ConversionCollection extends Collection
             $this->addManipulationToConversion($manipulation, $conversionName);
         }
     }
-
     /**
      * Get all the conversions in the collection.
      *
@@ -99,58 +86,52 @@ class ConversionCollection extends Collection
      *
      * @return $this
      */
-    public function getConversions(string $collectionName = '')
+    public function getConversions($collectionName = '')
     {
         if ($collectionName === '') {
             return $this;
         }
-
-        return $this->filter(function (Conversion $conversion) use ($collectionName) {
+        return $this->filter(function (Conversion $conversion) use($collectionName) {
             return $conversion->shouldBePerformedOn($collectionName);
         });
     }
-
     /*
      * Get all the conversions in the collection that should be queued.
      */
-    public function getQueuedConversions(string $collectionName = '') : ConversionCollection
+    public function getQueuedConversions($collectionName = '')
     {
         return $this->getConversions($collectionName)->filter(function (Conversion $conversion) {
             return $conversion->shouldBeQueued();
         });
     }
-
     /*
      * Add the given manipulation to the conversion with the given name.
      */
-    protected function addManipulationToConversion(array $manipulation, string $conversionName)
+    protected function addManipulationToConversion(array $manipulation, $conversionName)
     {
         foreach ($this as $conversion) {
             if ($conversion->getName() === $conversionName) {
                 $conversion->addAsFirstManipulation($manipulation);
-
                 return;
             }
         }
     }
-
     /*
      * Get all the conversions in the collection that should not be queued.
      */
-    public function getNonQueuedConversions(string $collectionName = '') : ConversionCollection
+    public function getNonQueuedConversions($collectionName = '')
     {
         return $this->getConversions($collectionName)->filter(function (Conversion $conversion) {
-            return ! $conversion->shouldBeQueued();
+            return !$conversion->shouldBeQueued();
         });
     }
-
     /**
      * Return the list of conversion files.
      */
-    public function getConversionsFiles(string $collectionName = '') : ConversionCollection
+    public function getConversionsFiles($collectionName = '')
     {
         return $this->getConversions($collectionName)->map(function (Conversion $conversion) {
-            return $conversion->getName().'.'.$conversion->getResultExtension();
+            return $conversion->getName() . '.' . $conversion->getResultExtension();
         });
     }
 }

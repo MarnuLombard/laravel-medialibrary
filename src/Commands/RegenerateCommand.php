@@ -9,11 +9,9 @@ use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\FileManipulator;
 use Spatie\MediaLibrary\Media;
 use Spatie\MediaLibrary\MediaRepository;
-
 class RegenerateCommand extends Command
 {
     use ConfirmableTrait;
-
     /**
      * The console command name.
      *
@@ -21,29 +19,24 @@ class RegenerateCommand extends Command
      */
     protected $signature = 'medialibrary:regenerate {modelType?} {--ids=*}
     {-- force : Force the operation to run when in production}';
-
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Regenerate the derived images of media';
-
     /**
      * @var \Spatie\MediaLibrary\MediaRepository
      */
     protected $mediaRepository;
-
     /**
      * @var \Spatie\MediaLibrary\FileManipulator
      */
     protected $fileManipulator;
-
     /**
      * @var array
      */
     protected $erroredMediaIds = [];
-
     /**
      * RegenerateCommand constructor.
      *
@@ -53,20 +46,17 @@ class RegenerateCommand extends Command
     public function __construct(MediaRepository $mediaRepository, FileManipulator $fileManipulator)
     {
         parent::__construct();
-
         $this->mediaRepository = $mediaRepository;
         $this->fileManipulator = $fileManipulator;
     }
-
     /**
      * Handle regeneration.
      */
     public function handle()
     {
-        if (! $this->confirmToProceed()) {
+        if (!$this->confirmToProceed()) {
             return;
         }
-
         $this->getMediaToBeRegenerated()->each(function (Media $media) {
             try {
                 $this->fileManipulator->createDerivedFiles($media);
@@ -76,31 +66,24 @@ class RegenerateCommand extends Command
                 $this->erroredMediaIds[] = $media->id;
             }
         });
-
         if (count($this->erroredMediaIds)) {
-            $this->warn('The derived files of these media ids could not be regenerated: '.implode(',', $this->erroredMediaIds));
+            $this->warn('The derived files of these media ids could not be regenerated: ' . implode(',', $this->erroredMediaIds));
         }
-
         $this->info('All done!');
     }
-
-    public function getMediaToBeRegenerated(): Collection
+    public function getMediaToBeRegenerated()
     {
-        $modelType = $this->argument('modelType') ?? '';
+        $modelType = is_null($this->argument('modelType')) ? $this->argument('modelType') : '';
         $mediaIds = $this->option('ids');
-
-        if ($modelType === '' && ! $mediaIds) {
+        if ($modelType === '' && !$mediaIds) {
             return $this->mediaRepository->all();
         }
-
         if ($mediaIds) {
-            if (! is_array($mediaIds)) {
+            if (!is_array($mediaIds)) {
                 $mediaIds = explode(',', $mediaIds);
             }
-
             return $this->mediaRepository->getByIds($mediaIds);
         }
-
         return $this->mediaRepository->getByModelType($modelType);
     }
 }

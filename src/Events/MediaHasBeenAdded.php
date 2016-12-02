@@ -4,16 +4,13 @@ namespace Spatie\MediaLibrary\Events;
 
 use Illuminate\Queue\SerializesModels;
 use Spatie\MediaLibrary\Media;
-
 class MediaHasBeenAdded
 {
     use SerializesModels;
-
     /**
      * @var \Spatie\MediaLibrary\Media
      */
     public $media;
-
     /*
      * @param \Spatie\MediaLibrary\Media $media
      */

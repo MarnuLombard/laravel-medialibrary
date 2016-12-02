@@ -12,29 +12,21 @@ use Spatie\MediaLibrary\ImageGenerators\FileTypes\Pdf;
 use Spatie\MediaLibrary\ImageGenerators\FileTypes\Svg;
 use Spatie\MediaLibrary\ImageGenerators\FileTypes\Video;
 use Spatie\MediaLibrary\UrlGenerator\UrlGeneratorFactory;
-
 class Media extends Model
 {
     use SortableTrait;
-
     const TYPE_OTHER = 'other';
     const TYPE_IMAGE = 'image';
     const TYPE_VIDEO = 'video';
     const TYPE_SVG = 'svg';
     const TYPE_PDF = 'pdf';
-
     protected $guarded = ['id', 'disk', 'file_name', 'size', 'model_type', 'model_id'];
-
     /**
      * The attributes that should be casted to native types.
      *
      * @var array
      */
-    protected $casts = [
-        'manipulations' => 'array',
-        'custom_properties' => 'array',
-    ];
-
+    protected $casts = ['manipulations' => 'array', 'custom_properties' => 'array'];
     /**
      * Create the polymorphic relation.
      *
@@ -44,7 +36,6 @@ class Media extends Model
     {
         return $this->morphTo();
     }
-
     /**
      * Get the original Url to a media-file.
      *
@@ -54,17 +45,14 @@ class Media extends Model
      *
      * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversion
      */
-    public function getUrl(string $conversionName = '') : string
+    public function getUrl($conversionName = '')
     {
         $urlGenerator = UrlGeneratorFactory::createForMedia($this);
-
         if ($conversionName !== '') {
             $urlGenerator->setConversion(ConversionCollection::createForMedia($this)->getByName($conversionName));
         }
-
         return $urlGenerator->getUrl();
     }
-
     /**
      * Get the original path to a media-file.
      *
@@ -74,30 +62,21 @@ class Media extends Model
      *
      * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversion
      */
-    public function getPath(string $conversionName = '') : string
+    public function getPath($conversionName = '')
     {
         $urlGenerator = UrlGeneratorFactory::createForMedia($this);
-
         if ($conversionName != '') {
             $urlGenerator->setConversion(ConversionCollection::createForMedia($this)->getByName($conversionName));
         }
-
         return $urlGenerator->getPath();
     }
-
     /**
      * Collection of all ImageGenerator drivers.
      */
-    public function getImageGenerators() : Collection
+    public function getImageGenerators()
     {
-        return collect([
-            Image::class,
-            Pdf::class,
-            Svg::class,
-            Video::class,
-        ]);
+        return collect([Image::class, Pdf::class, Svg::class, Video::class]);
     }
-
     /**
      * Determine the type of a file.
      *
@@ -109,10 +88,8 @@ class Media extends Model
         if ($type !== self::TYPE_OTHER) {
             return $type;
         }
-
         return $this->type_from_mime;
     }
-
     /**
      * Determine the type of a file from its file extension.
      *
@@ -120,67 +97,54 @@ class Media extends Model
      */
     public function getTypeFromExtensionAttribute()
     {
-        $imageGenerators = $this->getImageGenerators()
-            ->map(function (string $className) {
-                return app($className);
-            });
-
+        $imageGenerators = $this->getImageGenerators()->map(function ($className) {
+            return app($className);
+        });
         foreach ($imageGenerators as $imageGenerator) {
             if ($imageGenerator->canHandleExtension(strtolower($this->extension))) {
                 return $imageGenerator->getType();
             }
         }
-
         return static::TYPE_OTHER;
     }
-
     /*
      * Determine the type of a file from its mime type
      */
-    public function getTypeFromMimeAttribute() : string
+    public function getTypeFromMimeAttribute()
     {
-        $imageGenerators = $this->getImageGenerators()
-            ->map(function (string $className) {
-                return app($className);
-            });
-
+        $imageGenerators = $this->getImageGenerators()->map(function ($className) {
+            return app($className);
+        });
         foreach ($imageGenerators as $imageGenerator) {
             if ($imageGenerator->canHandleMime($this->getMimeAttribute())) {
                 return $imageGenerator->getType();
             }
         }
-
         return static::TYPE_OTHER;
     }
-
-    public function getMimeAttribute() : string
+    public function getMimeAttribute()
     {
         return File::getMimetype($this->getPath());
     }
-
-    public function getExtensionAttribute() : string
+    public function getExtensionAttribute()
     {
         return pathinfo($this->file_name, PATHINFO_EXTENSION);
     }
-
-    public function getHumanReadableSizeAttribute() : string
+    public function getHumanReadableSizeAttribute()
     {
         return File::getHumanReadableSize($this->size);
     }
-
-    public function getDiskDriverName() : string
+    public function getDiskDriverName()
     {
         return config("filesystems.disks.{$this->disk}.driver");
     }
-
     /*
      * Determine if the media item has a custom property with the given name.
      */
-    public function hasCustomProperty(string $propertyName) : bool
+    public function hasCustomProperty($propertyName)
     {
         return array_key_exists($propertyName, $this->custom_properties);
     }
-
     /**
      * Get if the value of custom property with the given name.
      *
@@ -189,45 +153,38 @@ class Media extends Model
      *
      * @return mixed
      */
-    public function getCustomProperty(string $propertyName, $default = null)
+    public function getCustomProperty($propertyName, $default = null)
     {
-        return $this->custom_properties[$propertyName] ?? $default;
+        return isset($this->custom_properties[$propertyName]) ? $this->custom_properties[$propertyName] : $default;
     }
-
     /**
      * @param string $name
      * @param mixed $value
      */
-    public function setCustomProperty(string $name, $value)
+    public function setCustomProperty($name, $value)
     {
         $this->custom_properties = array_merge($this->custom_properties, [$name => $value]);
     }
-
     /**
      * @param string $name
      *
      * @return $this
      */
-    public function removeCustomProperty(string $name)
+    public function removeCustomProperty($name)
     {
         if ($this->hasCustomProperty($name)) {
             $customProperties = $this->custom_properties;
-
             unset($customProperties[$name]);
-
             $this->custom_properties = $customProperties;
         }
-
         return $this;
     }
-
     /*
      * Get all the names of the registered media conversions.
      */
-    public function getMediaConversionNames() : array
+    public function getMediaConversionNames()
     {
         $conversions = ConversionCollection::createForMedia($this);
-
         return $conversions->map(function (Conversion $conversion) {
             return $conversion->getName();
         })->toArray();

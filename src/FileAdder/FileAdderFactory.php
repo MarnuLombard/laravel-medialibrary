@@ -4,7 +4,6 @@ namespace Spatie\MediaLibrary\FileAdder;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\Exceptions\FileCannotBeAdded;
-
 class FileAdderFactory
 {
     /**
@@ -15,11 +14,8 @@ class FileAdderFactory
      */
     public static function create(Model $subject, $file)
     {
-        return app(FileAdder::class)
-            ->setSubject($subject)
-            ->setFile($file);
+        return app(FileAdder::class)->setSubject($subject)->setFile($file);
     }
-
     /**
      * @param \Illuminate\Database\Eloquent\Model $subject
      * @param string                              $key
@@ -28,12 +24,11 @@ class FileAdderFactory
      *
      * @throws \Spatie\MediaLibrary\Exceptions\FileCannotBeAdded
      */
-    public static function createFromRequest(Model $subject, string $key)
+    public static function createFromRequest(Model $subject, $key)
     {
-        if (! request()->hasFile($key)) {
+        if (!request()->hasFile($key)) {
             throw FileCannotBeAdded::requestDoesNotHaveFile($key);
         }
-
         return static::create($subject, request()->file($key));
     }
 }

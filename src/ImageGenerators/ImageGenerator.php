@@ -4,11 +4,9 @@ namespace Spatie\MediaLibrary\ImageGenerators;
 
 use Spatie\MediaLibrary\Conversion\Conversion;
 use Spatie\MediaLibrary\Media;
-
 interface ImageGenerator
 {
     public function canConvert(Media $media);
-
     /**
      * Receive a file and return a thumbnail in jpg/png format.
      *
@@ -17,11 +15,8 @@ interface ImageGenerator
      *
      * @return string
      */
-    public function convert(string $path, Conversion $conversion = null) : string;
-
-    public function canHandleMime(string $mime = ''): bool;
-
-    public function canHandleExtension(string $extension = ''): bool;
-
-    public function getType(): string;
+    public function convert($path, Conversion $conversion = null);
+    public function canHandleMime($mime = '');
+    public function canHandleExtension($extension = '');
+    public function getType();
 }

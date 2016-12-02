@@ -7,11 +7,9 @@ use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Spatie\MediaLibrary\Media;
 use Spatie\MediaLibrary\MediaRepository;
-
 class ClearCommand extends Command
 {
     use ConfirmableTrait;
-
     /**
      * The console command name.
      *
@@ -19,19 +17,16 @@ class ClearCommand extends Command
      */
     protected $signature = 'medialibrary:clear {modelType?} {collectionName?}
     {-- force : Force the operation to run when in production}';
-
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Delete all items in a media collection.';
-
     /**
      * @var \Spatie\MediaLibrary\MediaRepository
      */
     protected $mediaRepository;
-
     /**
      * @param MediaRepository $mediaRepository
      */
@@ -40,43 +35,32 @@ class ClearCommand extends Command
         parent::__construct();
         $this->mediaRepository = $mediaRepository;
     }
-
     /**
      * Handle command.
      */
     public function handle()
     {
-        if (! $this->confirmToProceed()) {
+        if (!$this->confirmToProceed()) {
             return;
         }
-
         $this->getMediaItems()->each(function (Media $media) {
             $media->delete();
         });
-
         $this->info('All done!');
     }
-
-    public function getMediaItems() : Collection
+    public function getMediaItems()
     {
         $modelType = $this->argument('modelType');
         $collectionName = $this->argument('collectionName');
-
-        if (! is_null($modelType) && ! is_null($collectionName)) {
-            return $this->mediaRepository->getByModelTypeAndCollectionName(
-                $modelType,
-                $collectionName
-            );
+        if (!is_null($modelType) && !is_null($collectionName)) {
+            return $this->mediaRepository->getByModelTypeAndCollectionName($modelType, $collectionName);
         }
-
-        if (! is_null($modelType)) {
+        if (!is_null($modelType)) {
             return $this->mediaRepository->getByModelType($modelType);
         }
-
-        if (! is_null($collectionName)) {
+        if (!is_null($collectionName)) {
             return $this->mediaRepository->getByCollectionName($collectionName);
         }
-
         return $this->mediaRepository->all();
     }
 }

@@ -10,35 +10,25 @@ use FFMpeg\FFMpeg;
 
 class Video extends BaseGenerator
 {
-    public function convert(string $file, Conversion $conversion = null) : string
+    public function convert($file, Conversion $conversion = null)
     {
-        $imageFile = pathinfo($file, PATHINFO_DIRNAME).'/'.pathinfo($file, PATHINFO_FILENAME).'.jpg';
-
-        $ffmpeg = FFMpeg::create([
-            'ffmpeg.binaries' => config('laravel-medialibrary.ffmpeg_binaries'),
-            'ffprobe.binaries' => config('laravel-medialibrary.ffprobe_binaries'),
-        ]);
+        $imageFile = pathinfo($file, PATHINFO_DIRNAME) . '/' . pathinfo($file, PATHINFO_FILENAME) . '.jpg';
+        $ffmpeg = FFMpeg::create(['ffmpeg.binaries' => config('laravel-medialibrary.ffmpeg_binaries'), 'ffprobe.binaries' => config('laravel-medialibrary.ffprobe_binaries')]);
         $video = $ffmpeg->open($file);
-
         $seconds = $conversion ? $conversion->getExtractVideoFrameAtSecond() : 0;
-
         $frame = $video->frame(TimeCode::fromSeconds($seconds));
         $frame->save($imageFile);
-
         return $imageFile;
     }
-
-    public function requirementsAreInstalled() : bool
+    public function requirementsAreInstalled()
     {
         return class_exists('\\FFMpeg\\FFMpeg');
     }
-
-    public function supportedExtensions() : Collection
+    public function supportedExtensions()
     {
         return collect(['webm', 'mov', 'mp4']);
     }
-
-    public function supportedMimeTypes() : Collection
+    public function supportedMimeTypes()
     {
         return collect(['video/webm', 'video/mpeg', 'video/mp4', 'video/quicktime']);
     }

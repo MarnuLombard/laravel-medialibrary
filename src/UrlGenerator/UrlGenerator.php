@@ -5,7 +5,6 @@ namespace Spatie\MediaLibrary\UrlGenerator;
 use Spatie\MediaLibrary\Conversion\Conversion;
 use Spatie\MediaLibrary\Media;
 use Spatie\MediaLibrary\PathGenerator\PathGenerator;
-
 interface UrlGenerator
 {
     /**
@@ -13,22 +12,19 @@ interface UrlGenerator
      *
      * @return string
      */
-    public function getUrl() : string;
-
+    public function getUrl();
     /**
      * @param \Spatie\MediaLibrary\Media $media
      *
      * @return \Spatie\MediaLibrary\UrlGenerator\UrlGenerator
      */
-    public function setMedia(Media $media) : UrlGenerator;
-
+    public function setMedia(Media $media);
     /**
      * @param \Spatie\MediaLibrary\Conversion\Conversion $conversion
      *
      * @return \Spatie\MediaLibrary\UrlGenerator\UrlGenerator
      */
-    public function setConversion(Conversion $conversion) : UrlGenerator;
-
+    public function setConversion(Conversion $conversion);
     /**
      * Set the path generator class.
      *
@@ -36,5 +32,5 @@ interface UrlGenerator
      *
      * @return \Spatie\MediaLibrary\UrlGenerator\UrlGenerator
      */
-    public function setPathGenerator(PathGenerator $pathGenerator) : UrlGenerator;
+    public function setPathGenerator(PathGenerator $pathGenerator);
 }

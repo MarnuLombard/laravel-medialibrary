@@ -6,47 +6,35 @@ use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\Helpers\File;
 use Spatie\MediaLibrary\Media;
 use Spatie\MediaLibrary\UrlGenerator\UrlGeneratorFactory;
-
 abstract class BaseGenerator implements ImageGenerator
 {
-    public function canConvert(Media $media): bool
+    public function canConvert(Media $media)
     {
-        if (! $this->requirementsAreInstalled()) {
+        if (!$this->requirementsAreInstalled()) {
             return false;
         }
-
         if ($this->supportedExtensions()->contains(strtolower($media->extension))) {
             return true;
         }
-
         $urlGenerator = UrlGeneratorFactory::createForMedia($media);
-
-        if (method_exists($urlGenerator, 'getPath') && file_exists($media->getPath())
-            && $this->supportedMimetypes()->contains(strtolower(File::getMimetype($media->getPath())))) {
+        if (method_exists($urlGenerator, 'getPath') && file_exists($media->getPath()) && $this->supportedMimetypes()->contains(strtolower(File::getMimetype($media->getPath())))) {
             return true;
         }
-
         return false;
     }
-
-    public function canHandleMime(string $mime = ''): bool
+    public function canHandleMime($mime = '')
     {
         return $this->supportedMimetypes()->contains($mime);
     }
-
-    public function canHandleExtension(string $extension = ''): bool
+    public function canHandleExtension($extension = '')
     {
         return $this->supportedExtensions()->contains($extension);
     }
-
-    public function getType(): string
+    public function getType()
     {
         return strtolower(class_basename(static::class));
     }
-
-    abstract public function requirementsAreInstalled(): bool;
-
-    abstract public function supportedExtensions(): Collection;
-
-    abstract public function supportedMimetypes(): Collection;
+    public abstract function requirementsAreInstalled();
+    public abstract function supportedExtensions();
+    public abstract function supportedMimetypes();
 }

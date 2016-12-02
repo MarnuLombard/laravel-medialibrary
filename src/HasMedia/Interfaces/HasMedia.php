@@ -10,7 +10,6 @@ interface HasMedia
      * @return mixed
      */
     public function media();
-
     /**
      * Move a file to the medialibrary.
      *
@@ -19,7 +18,6 @@ interface HasMedia
      * @return \Spatie\MediaLibrary\FileAdder\FileAdder
      */
     public function addMedia($file);
-
     /**
      * Copy a file to the medialibrary.
      *
@@ -28,7 +26,6 @@ interface HasMedia
      * @return \Spatie\MediaLibrary\FileAdder\FileAdder
      */
     public function copyMedia($file);
-
     /**
      * Determine if there is media in the given collection.
      *
@@ -36,8 +33,7 @@ interface HasMedia
      *
      * @return bool
      */
-    public function hasMedia(string $collectionMedia = '') : bool;
-
+    public function hasMedia($collectionMedia = '');
     /**
      * Get media collection by its collectionName.
      *
@@ -46,15 +42,13 @@ interface HasMedia
      *
      * @return \Spatie\MediaLibrary\Media
      */
-    public function getMedia(string $collectionName = 'default', $filters = []);
-
+    public function getMedia($collectionName = 'default', $filters = []);
     /**
      * Remove all media in the given collection.
      *
      * @param string $collectionName
      */
-    public function clearMediaCollection(string $collectionName = 'default');
-
+    public function clearMediaCollection($collectionName = 'default');
     /**
      * Determines if the media files should be preserved when the media object gets deleted.
      *

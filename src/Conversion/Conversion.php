@@ -3,80 +3,65 @@
 namespace Spatie\MediaLibrary\Conversion;
 
 use Spatie\MediaLibrary\Exceptions\InvalidConversionParameter;
-
 class Conversion
 {
     /**
      * @var string name
      */
     protected $name = '';
-
     /**
      * @var int
      */
     protected $extractVideoFrameAtSecond = 0;
-
     /**
      * @var array
      */
     protected $manipulations = [];
-
     /**
      * @var array
      */
     protected $performOnCollections = [];
-
     /**
      * @var bool
      */
     protected $performOnQueue = true;
-
-    public function __construct(string $name)
+    public function __construct($name)
     {
         $this->name = $name;
     }
-
-    public static function create(string $name)
+    public static function create($name)
     {
         return new static($name);
     }
-
-    public function getName() : string
+    public function getName()
     {
         return $this->name;
     }
-
     /*
      * Set the timecode in seconds to extract a video thumbnail.
      * Only used on video media.
      */
-    public function setExtractVideoFrameAtSecond(int $timecode) : Conversion
+    public function setExtractVideoFrameAtSecond($timecode)
     {
         $this->extractVideoFrameAtSecond = $timecode;
-
         return $this;
     }
-
-    public function getExtractVideoFrameAtSecond(): int
+    public function getExtractVideoFrameAtSecond()
     {
         return $this->extractVideoFrameAtSecond;
     }
-
     /**
      * Get the manipulations of this conversion.
      */
-    public function getManipulations() : array
+    public function getManipulations()
     {
         $manipulations = $this->manipulations;
-
         //if format not is specified, create a jpg
-        if (count($manipulations) && ! $this->containsFormatManipulation($manipulations)) {
+        if (count($manipulations) && !$this->containsFormatManipulation($manipulations)) {
             $manipulations[0]['fm'] = 'jpg';
         }
-
         return $manipulations;
     }
-
     /**
      * Set the manipulations for this conversion.
      *
@@ -87,10 +72,8 @@ class Conversion
     public function setManipulations(...$manipulations)
     {
         $this->manipulations = $manipulations;
-
         return $this;
     }
-
     /**
      * Add the given manipulation as the first manipulation.
      *
@@ -101,10 +84,8 @@ class Conversion
     public function addAsFirstManipulation(array $manipulation)
     {
         array_unshift($this->manipulations, $manipulation);
-
         return $this;
     }
-
     /**
      * Set the collection names on which this conversion must be performed.
      *
@@ -115,28 +96,23 @@ class Conversion
     public function performOnCollections(...$collectionNames)
     {
         $this->performOnCollections = $collectionNames;
-
         return $this;
     }
-
     /*
      * Determine if this conversion should be performed on the given
      * collection.
      */
-    public function shouldBePerformedOn(string $collectionName) : bool
+    public function shouldBePerformedOn($collectionName)
     {
         //if no collections were specified, perform conversion on all collections
-        if (! count($this->performOnCollections)) {
+        if (!count($this->performOnCollections)) {
             return true;
         }
-
         if (in_array('*', $this->performOnCollections)) {
             return true;
         }
-
         return in_array($collectionName, $this->performOnCollections);
     }
-
     /**
      * Mark this conversion as one that should be queued.
      *
@@ -145,10 +121,8 @@ class Conversion
     public function queued()
     {
         $this->performOnQueue = true;
-
         return $this;
     }
-
     /**
      * Mark this conversion as one that should not be queued.
      *
@@ -157,48 +131,40 @@ class Conversion
     public function nonQueued()
     {
         $this->performOnQueue = false;
-
         return $this;
     }
-
     /*
      * Determine if the conversion should be queued.
      */
-    public function shouldBeQueued() : bool
+    public function shouldBeQueued()
     {
         return $this->performOnQueue;
     }
-
     /*
      * Get the extension that the result of this conversion must have.
      */
-    public function getResultExtension(string $originalFileExtension = '') : string
+    public function getResultExtension($originalFileExtension = '')
     {
         return array_reduce($this->getManipulations(), function ($carry, array $manipulation) {
             if (isset($manipulation['fm'])) {
                 $keepExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-
-                return ($manipulation['fm'] === 'src' && in_array($carry, $keepExtensions)) ? $carry : $manipulation['fm'];
+                return $manipulation['fm'] === 'src' && in_array($carry, $keepExtensions) ? $carry : $manipulation['fm'];
             }
-
             return $carry;
         }, $originalFileExtension);
     }
-
     /*
      * Determine if the given manipulations contain a format manipulation.
      */
-    protected function containsFormatManipulation(array $manipulations) : bool
+    protected function containsFormatManipulation(array $manipulations)
     {
         foreach ($manipulations as $manipulation) {
             if (array_key_exists('fm', $manipulation)) {
                 return true;
             }
         }
-
         return false;
     }
-
     /**
      * Set the target width.
      * Matches with Glide's 'w'-parameter.
@@ -209,17 +175,14 @@ class Conversion
      *
      * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversionParameter
      */
-    public function setWidth(int $width)
+    public function setWidth($width)
     {
         if ($width < 1) {
             throw InvalidConversionParameter::invalidWidth();
         }
-
         $this->setManipulationParameter('w', $width);
-
         return $this;
     }
-
     /**
      * Set the target height.
      * Matches with Glide's 'h'-parameter.
@@ -230,17 +193,14 @@ class Conversion
      *
      * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversionParameter
      */
-    public function setHeight(int $height)
+    public function setHeight($height)
     {
         if ($height < 1) {
             throw InvalidConversionParameter::invalidHeight();
         }
-
         $this->setManipulationParameter('h', $height);
-
         return $this;
     }
-
     /**
      * Set the target format.
      * Matches with Glide's 'fm'-parameter.
@@ -251,19 +211,15 @@ class Conversion
      *
      * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversionParameter
      */
-    public function setFormat(string $format)
+    public function setFormat($format)
     {
         $validFormats = ['jpg', 'png', 'gif', 'src'];
-
-        if (! in_array($format, $validFormats)) {
+        if (!in_array($format, $validFormats)) {
             throw InvalidConversionParameter::invalidFormat($format, $validFormats);
         }
-
         $this->setManipulationParameter('fm', $format);
-
         return $this;
     }
-
     /**
      * Set the target fit.
      * Matches with Glide's 'fit'-parameter.
@@ -274,34 +230,15 @@ class Conversion
      *
      * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversionParameter
      */
-    public function setFit(string $fit)
+    public function setFit($fit)
     {
-        $validFits = [
-            'contain',
-            'max',
-            'fill',
-            'stretch',
-            'crop',
-            'crop-top-left',
-            'crop-top',
-            'crop-top-right',
-            'crop-left',
-            'crop-center',
-            'crop-right',
-            'crop-bottom-left',
-            'crop-bottom',
-            'crop-bottom-right',
-        ];
-
-        if (! in_array($fit, $validFits)) {
+        $validFits = ['contain', 'max', 'fill', 'stretch', 'crop', 'crop-top-left', 'crop-top', 'crop-top-right', 'crop-left', 'crop-center', 'crop-right', 'crop-bottom-left', 'crop-bottom', 'crop-bottom-right'];
+        if (!in_array($fit, $validFits)) {
             throw InvalidConversionParameter::invalidFit($fit, $validFits);
         }
-
         $this->setManipulationParameter('fit', $fit);
-
         return $this;
     }
-
     /**
      * Crops the image to specific dimensions prior to any other resize operations.
      *
@@ -314,19 +251,16 @@ class Conversion
      *
      * @throws \Spatie\MediaLibrary\Exceptions\InvalidConversionParameter
      */
-    public function setCrop(int $width, int $height, int $x, int $y)
+    public function setCrop($width, $height, $x, $y)
     {
         foreach (compact('width', 'height') as $name => $value) {
             if ($value < 1) {
                 throw InvalidConversionParameter::shouldBeGreaterThanOne($name, $value);
             }
         }
-
         $this->setManipulationParameter('crop', implode(',', [$width, $height, $x, $y]));
-
         return $this;
     }
-
     /**
      * Set the manipulation parameter.
      *
@@ -335,12 +269,10 @@ class Conversion
      *
      * @return $this
      */
-    public function setManipulationParameter(string $name, string $value)
+    public function setManipulationParameter($name, $value)
     {
         $manipulation = array_pop($this->manipulations) ?: [];
-
         $this->manipulations[] = array_merge($manipulation, [$name => $value]);
-
         return $this;
     }
 }
